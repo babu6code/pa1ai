@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pa1 AI</title>
 
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
     * {
         margin: 0;
@@ -15,108 +18,144 @@
     body {
         height: 100vh;
         overflow: hidden;
-        font-family: 'Segoe UI', sans-serif;
-        background: linear-gradient(-45deg, #0f172a, #020617, #0a0f2c, #000000);
-        background-size: 400% 400%;
-        animation: gradientMove 15s ease infinite;
+        background: #030712;
         color: white;
+        font-family: 'Orbitron', sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         text-align: center;
     }
 
-    @keyframes gradientMove {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
     }
 
-    .container {
+    .content {
         z-index: 2;
-        max-width: 800px;
-        padding: 20px;
+        position: relative;
     }
 
     h1 {
-        font-size: 70px;
-        letter-spacing: 5px;
+        font-size: 80px;
+        letter-spacing: 8px;
+        font-weight: 700;
         background: linear-gradient(90deg, #38bdf8, #a78bfa);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: glow 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes glow {
-        from {
-            text-shadow: 0 0 10px rgba(56,189,248,0.4);
-        }
-        to {
-            text-shadow: 0 0 25px rgba(167,139,250,0.8);
-        }
+        text-shadow: 0 0 30px rgba(56,189,248,0.4);
     }
 
     .tagline {
         margin-top: 20px;
-        font-size: 22px;
+        font-size: 20px;
         color: #94a3b8;
+        letter-spacing: 2px;
     }
 
     .future {
         margin-top: 30px;
-        font-size: 18px;
+        font-size: 16px;
         color: #38bdf8;
-        opacity: 0.8;
+        opacity: 0.7;
     }
-
-    /* Floating particles */
-    .particles span {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: #38bdf8;
-        border-radius: 50%;
-        animation: float 10s linear infinite;
-        opacity: 0.6;
-    }
-
-    @keyframes float {
-        from {
-            transform: translateY(100vh) scale(0);
-        }
-        to {
-            transform: translateY(-10vh) scale(1);
-        }
-    }
-
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<canvas id="network"></canvas>
+
+<div class="content">
     <h1>Pa1 AI</h1>
     <div class="tagline">
-        Engineering Intelligence.<br>
-        Designing the Future.
+        Architecting Intelligence.<br>
+        Building Tomorrow.
     </div>
     <div class="future">
-        Artificial Intelligence • Automation • Security • Innovation
+        Artificial Intelligence • Security • Automation • Innovation
     </div>
 </div>
 
-<div class="particles"></div>
-
 <script>
-    const particlesContainer = document.querySelector('.particles');
+const canvas = document.getElementById('network');
+const ctx = canvas.getContext('2d');
 
-    for (let i = 0; i < 60; i++) {
-        let particle = document.createElement('span');
-        particle.style.left = Math.random() * 100 + 'vw';
-        particle.style.animationDuration = (5 + Math.random() * 10) + 's';
-        particle.style.animationDelay = Math.random() * 5 + 's';
-        particlesContainer.appendChild(particle);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+const particleCount = 80;
+
+class Particle {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.7;
+        this.vy = (Math.random() - 0.5) * 0.7;
     }
+
+    move() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x <= 0 || this.x >= canvas.width) this.vx *= -1;
+        if (this.y <= 0 || this.y >= canvas.height) this.vy *= -1;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = "#38bdf8";
+        ctx.fill();
+    }
+}
+
+function connectParticles() {
+    for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+            let dx = particles[a].x - particles[b].x;
+            let dy = particles[a].y - particles[b].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < 120) {
+                ctx.beginPath();
+                ctx.strokeStyle = "rgba(167,139,250," + (1 - distance / 120) + ")";
+                ctx.lineWidth = 0.5;
+                ctx.moveTo(particles[a].x, particles[a].y);
+                ctx.lineTo(particles[b].x, particles[b].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach(p => {
+        p.move();
+        p.draw();
+    });
+
+    connectParticles();
+
+    requestAnimationFrame(animate);
+}
+
+for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
 </script>
 
 </body>
